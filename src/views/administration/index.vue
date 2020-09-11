@@ -45,7 +45,7 @@
           >
             <div style="position: absolute;top:0px;left:0px;">未连接</div>
             <div style="float:left;">
-              <el-checkbox v-model="flag"></el-checkbox>
+              <el-checkbox :key="index" @change="elCheckbox"></el-checkbox>
               <div style="margin-left:20px;display:inline-block;">{{item.name}}</div>
               <div style="margin-left:20px;display:inline-block;">
                 <div>序列号：{{item.sequence}}</div>
@@ -62,7 +62,6 @@
           </div>
           <div>
             <el-pagination
-              @size-change="handleSizeChange"
               @current-change="handleCurrentChange"
               layout="total, prev, pager, next"
               :total="total"
@@ -79,7 +78,6 @@ export default {
   data() {
     return {
       equipmentGroupFlag: false,
-      flag: false,
       formInline: {
         equipment: "",
         equipmentGroup: "",
@@ -108,11 +106,16 @@ export default {
     onSubmit() {
       console.log("submit!");
     },
-    handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
-    },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+      let showList = JSON.parse(JSON.stringify(this.list));
+      let newList = [];
+      newList = showList.filter((value, index) => {
+        return index < 10 * val && index >= 10 * (val - 1);
+      });
+      this.showList = newList;
+    },
+    elCheckbox(e) {
+      console.log(e);
     },
   },
   mounted() {
@@ -151,5 +154,9 @@ export default {
   background-color: #fff;
   padding-top: 10px;
   margin: 0px 0px 20px;
+}
+
+.el-link {
+  margin: 10px;
 }
 </style>

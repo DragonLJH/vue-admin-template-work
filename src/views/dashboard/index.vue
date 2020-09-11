@@ -1,18 +1,23 @@
 <template>
   <div class="dashboard-container">
     <div class="dashboard-text">name: {{ name }}</div>
-    <div><span></span>123</div>
+    <div>
+      <CMainShow></CMainShow>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
-
+import CMainShow from "@/components/controller/CMainShow";
 export default {
   name: "Dashboard",
   computed: {
-    ...mapGetters(["name"])
-  }
+    ...mapGetters(["name"]),
+  },
+  components: {
+    CMainShow,
+  },
 };
 </script>
 

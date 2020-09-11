@@ -2,24 +2,22 @@
   <div class="app-controller">
     <el-container>
       <el-aside>
-        <div>123</div>
-        <el-tabs type="border-card" stretch>
+        <div>
+          <div class="demo-input-suffix">
+            <el-input placeholder="请输入内容" v-model="search">
+              <i
+                slot="suffix"
+                style="cursor: pointer;"
+                @click="searchClick"
+                class="el-input__icon el-icon-search"
+              ></i>
+            </el-input>
+          </div>
+        </div>
+        <el-tabs type="border-card" stretch @tab-click="tabClick">
           <el-tab-pane>
             <span slot="label" @click="onclickItems">所有设备</span>
-            <el-collapse v-model="activeNames" @change="onclickItem2">
-              <el-collapse-item v-for="(item, index) in list" :key="index" :name="index">
-                <template slot="title">
-                  <span>{{ item.title }}</span>===
-                  <span>{{ item.items.length }}</span>
-                </template>
-                <div
-                  v-for="(res, i) in item.items"
-                  :key="i"
-                  class="likeTable"
-                  @click="onclickItem(res)"
-                >{{ res.name }}</div>
-              </el-collapse-item>
-            </el-collapse>
+            <CShow :list="list" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
           </el-tab-pane>
           <el-tab-pane>
             <span slot="label" style="position: relative;" @click="onclickWarn">
@@ -30,6 +28,7 @@
                 style="position: absolute; top: -12px; right: -25px;"
               ></el-badge>
             </span>
+            <CShow :list="warnlist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
           </el-tab-pane>
           <el-tab-pane>
             <span slot="label" style="position: relative;" @click="onclickLeave">
@@ -41,9 +40,15 @@
                 style="position: absolute; top: -12px; right: -25px;"
               ></el-badge>
             </span>
+            <CShow :list="leavelist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
           </el-tab-pane>
         </el-tabs>
-        <div>123</div>
+        <div>
+          <el-row class="asideFooter">
+            <el-col :span="12">设备组管理</el-col>
+            <el-col :span="12">新建设备组</el-col>
+          </el-row>
+        </div>
       </el-aside>
       <el-main>
         <el-row>
@@ -57,6 +62,12 @@
             </el-row>
           </el-col>
         </el-row>
+        <!-- 分页准备 -->
+        <!-- <el-pagination
+          @current-change="handleCurrentChange"
+          layout="total, prev, pager, next"
+          :total="total"
+        ></el-pagination>-->
       </el-main>
     </el-container>
   </div>
@@ -64,16 +75,22 @@
 
 <script>
 import { getList } from "@/api/controller";
+import CShow from "@/components/controller/CShow";
 export default {
+  components: { CShow },
   data() {
     return {
       mainShow: [], //mainShow是在Main中显示的数据
+      // mainShowPage: [],//分页准备
+      total: 0,
       warn: 0, //warn是tabs上报警的Badge 数量标记
       leave: 0, //leave是tabs上离线的Badge 数量标记
       list: [], //list是tabs上所以设备底下显示数据
       warnlist: [], //warnlist是tabs上报警显示数据
       leavelist: [], //warnlist是tabs上离线底下显示数据
       activeNames: [],
+      search: "",
+      tabIndex: 0,
     };
   },
   methods: {
@@ -117,12 +134,24 @@ export default {
       getList().then((res) => {
         //res 是获取到的模拟数据
         this.list = JSON.parse(JSON.stringify(res.data.items));
-        this.warnlist = JSON.parse(JSON.stringify(res.data.items));
-        this.leavelist = JSON.parse(JSON.stringify(res.data.items));
+
+        this.warnlist = this.toFilter(
+          JSON.parse(JSON.stringify(res.data.items)),
+          "warn"
+        );
+        this.leavelist = this.toFilter(
+          JSON.parse(JSON.stringify(res.data.items)),
+          "leave"
+        );
         let mainShowList = JSON.parse(JSON.stringify(res.data.items));
         let newList = [];
         newList = this.toArr(mainShowList);
         this.mainShow = newList;
+        //分页准备
+        // this.total = this.mainShow.length;
+        // this.mainShowPage = newList.filter((val, index) => {
+        //   return index >= 0 && index < 5;
+        // });
 
         this.warn = this.toArr(mainShowList).filter((wranVal) => {
           return wranVal.type === "warn";
@@ -143,28 +172,58 @@ export default {
       list.push(value);
       this.mainShow = list;
     },
-    onclickItem2(index) {
-      let list = this.list;
-      console.log(list);
+    onclickWarn() {
+      let mainShowList = this.warnlist;
       let newList = [];
-      index.forEach((flagIndex) => {
-        list[flagIndex].items.forEach((val) => {
-          newList.push(val);
-        });
-      });
+      newList = this.toArr(mainShowList);
       this.mainShow = newList;
     },
-    onclickWarn() {},
-    onclickLeave() {},
+    onclickLeave() {
+      let mainShowList = this.leavelist;
+      let newList = [];
+      newList = this.toArr(mainShowList);
+      this.mainShow = newList;
+    },
+    CShowClick(val) {
+      this.mainShow = val;
+    },
+    CShowChange(val) {
+      if (!val.length) this.mainShow = this.warnlist;
+      this.mainShow = val;
+    },
+    searchClick() {
+      console.log(this.search);
+    },
+    tabClick(val) {
+      this.tabIndex = val.index;
+    },
+    //分页准备
+    // handleCurrentChange(val) {
+    //   let showList = JSON.parse(JSON.stringify(this.mainShow));
+    //   let newList = [];
+    //   newList = showList.filter((value, index) => {
+    //     return index < 6 * val && index >= 6 * (val - 1);
+    //   });
+    //   this.mainShowPage = newList;
+    // },
   },
   mounted() {
     this.fetchData();
   },
   watch: {
-    activeNames: function (val, oldVal) {
+    mainShow: function (val, oldVal) {
       if (!val.length) {
-        // console.log(val, oldVal);
-        this.onclickItems();
+        switch (parseInt(this.tabIndex)) {
+          case 0:
+            this.onclickItems();
+            break;
+          case 1:
+            this.onclickWarn();
+            break;
+          default:
+            this.onclickLeave();
+            break;
+        }
       }
     },
   },
@@ -172,15 +231,6 @@ export default {
 </script>
 
 <style scoped>
-.likeTable {
-  margin: 10px 0px;
-  padding: 5px 10px;
-  cursor: pointer;
-  background-color: #999;
-}
-.likeTable:hover {
-  background-color: #aaa;
-}
 .mainShow {
   margin: 10px 0px;
   padding: 5px 10px;
@@ -191,7 +241,34 @@ export default {
   background-color: #3aa;
 }
 
-.mainShow > .mainShow-content{
+.mainShow > .mainShow-content {
   margin: 10px 0px;
+}
+
+.asideFooter > div {
+  color: #3aa;
+  padding: 20px 0px;
+  text-align: center;
+  cursor: pointer;
+  background-color: #eee;
+  position: relative;
+}
+
+.asideFooter > div:hover::before {
+  content: "";
+  border: solid 1px #3aa;
+  width: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.asideFooter > div:first-child::after {
+  content: "";
+  border: solid 1px #999;
+  height: 60%;
+  position: absolute;
+  top: 12px;
+  right: 0px;
 }
 </style>
