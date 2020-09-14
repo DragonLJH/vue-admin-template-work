@@ -1,83 +1,108 @@
 <template>
   <div class="app-controller">
-    <el-container>
-      <el-aside>
-        <div>
-          <div class="demo-input-suffix">
-            <el-input placeholder="请输入内容" v-model="search">
-              <i
-                slot="suffix"
-                style="cursor: pointer;"
-                @click="searchClick"
-                class="el-input__icon el-icon-search"
-              ></i>
-            </el-input>
-          </div>
-        </div>
-        <el-tabs type="border-card" stretch @tab-click="tabClick">
-          <el-tab-pane>
-            <span slot="label" @click="onclickItems">所有设备</span>
-            <CShow :list="list" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
-          </el-tab-pane>
-          <el-tab-pane>
-            <span slot="label" style="position: relative;" @click="onclickWarn">
-              报警
-              <el-badge
-                :value="warn"
-                class="item"
-                style="position: absolute; top: -12px; right: -25px;"
-              ></el-badge>
+    <div>
+      <div class="demo-input-suffix">
+        <el-input placeholder="请输入内容" v-model="search">
+          <i
+            slot="suffix"
+            style="cursor: pointer;"
+            @click="searchClick"
+            class="el-input__icon el-icon-search"
+          ></i>
+        </el-input>
+      </div>
+    </div>
+    <el-tabs type="border-card" stretch @tab-click="tabClick">
+      <el-tab-pane>
+        <span slot="label" @click="onclickItems">所有设备</span>
+        <CShow :list="list" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
+      </el-tab-pane>
+      <el-tab-pane>
+        <span slot="label" style="position: relative;" @click="onclickWarn">
+          报警
+          <el-badge
+            :value="warn"
+            class="item"
+            style="position: absolute; top: -12px; right: -25px;"
+          ></el-badge>
+        </span>
+        <CShow :list="warnlist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
+      </el-tab-pane>
+      <el-tab-pane>
+        <span slot="label" style="position: relative;" @click="onclickLeave">
+          离线
+          <el-badge
+            type="info"
+            :value="leave"
+            class="item"
+            style="position: absolute; top: -12px; right: -25px;"
+          ></el-badge>
+        </span>
+        <CShow :list="leavelist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
+      </el-tab-pane>
+    </el-tabs>
+    <div>
+      <el-row class="asideFooter">
+        <el-col :span="12">设备组管理</el-col>
+        <el-col :span="12">新建设备组</el-col>
+      </el-row>
+    </div>
+    <el-row>
+      <el-col :span="24" v-for="(item,index) in mainShow" :key="index" class="mainShow">
+        <el-row class="mainShow-content">
+          <el-col :span="24" class="mainShow-content-item1">
+            <span>{{item.name}}</span>
+            <span>序列号：{{item.ip}}</span>
+            <span style="float:right;">
+              <EditModalBoxes
+                :sf="index"
+                style="display:inline-block;"
+                @openEditModalBoxes="openEditModal"
+                :tindex="tabIndex"
+                :grouplist="grouplist.length === 0 ? list : grouplist"
+                :device="item"
+              ></EditModalBoxes>
+              <el-button type="warning" icon="el-icon-s-tools" circle size="mini"></el-button>
             </span>
-            <CShow :list="warnlist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
-          </el-tab-pane>
-          <el-tab-pane>
-            <span slot="label" style="position: relative;" @click="onclickLeave">
-              离线
-              <el-badge
-                type="info"
-                :value="leave"
-                class="item"
-                style="position: absolute; top: -12px; right: -25px;"
-              ></el-badge>
-            </span>
-            <CShow :list="leavelist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
-          </el-tab-pane>
-        </el-tabs>
-        <div>
-          <el-row class="asideFooter">
-            <el-col :span="12">设备组管理</el-col>
-            <el-col :span="12">新建设备组</el-col>
-          </el-row>
-        </div>
-      </el-aside>
-      <el-main>
-        <el-row>
-          <el-col :span="24" v-for="(item, key, index) in mainShow" :key="index" class="mainShow">
-            <el-row type="flex" justify="end">
-              <el-button type="primary" icon="el-icon-edit" circle></el-button>
-              <el-button type="warning" icon="el-icon-s-tools" circle></el-button>
-            </el-row>
-            <el-row type="flex" justify="space-around" class="mainShow-content">
-              <el-col v-for="(res,key, index) in item" :key="index">{{key}}:{{res}}</el-col>
-            </el-row>
+          </el-col>
+          <el-col
+            class="mainShow-content-item2"
+            v-for="(res,index) in item.main"
+            :key="index"
+            :span="24"
+          >
+            <div>
+              <el-button type="primary" icon="el-icon-bell" circle size="mini"></el-button>
+              <el-button type="warning" icon="el-icon-odometer" circle size="mini"></el-button>
+              <el-button type="warning" icon="el-icon-time" circle size="mini"></el-button>
+            </div>
+            <div>
+              <div>{{res.name}}</div>
+              <div>{{res.id}}</div>
+            </div>
+            <div>
+              <div>{{res.type}}</div>
+              <div>{{res.date}}</div>
+            </div>
           </el-col>
         </el-row>
-        <!-- 分页准备 -->
-        <!-- <el-pagination
+      </el-col>
+    </el-row>
+    <!-- 分页准备 -->
+    <!-- <el-pagination
           @current-change="handleCurrentChange"
           layout="total, prev, pager, next"
           :total="total"
-        ></el-pagination>-->
-      </el-main>
-    </el-container>
+    ></el-pagination>-->
   </div>
 </template>
 
 <script>
 import { getList } from "@/api/controller";
 import CShow from "@/components/controller/CShow";
+import EditModalBoxes from "@/components/controller/EditModalBoxes";
 export default {
-  components: { CShow },
+  components: { CShow, EditModalBoxes },
   data() {
     return {
       mainShow: [], //mainShow是在Main中显示的数据
@@ -88,9 +113,10 @@ export default {
       list: [], //list是tabs上所以设备底下显示数据
       warnlist: [], //warnlist是tabs上报警显示数据
       leavelist: [], //warnlist是tabs上离线底下显示数据
-      activeNames: [],
+      // activeNames: [],
       search: "",
       tabIndex: 0,
+      grouplist: [],
     };
   },
   methods: {
@@ -197,6 +223,7 @@ export default {
     tabClick(val) {
       this.tabIndex = val.index;
     },
+    openEditModal() {},
     //分页准备
     // handleCurrentChange(val) {
     //   let showList = JSON.parse(JSON.stringify(this.mainShow));
@@ -226,6 +253,19 @@ export default {
         }
       }
     },
+    tabIndex: function (val) {
+      switch (parseInt(val)) {
+        case 0:
+          this.grouplist = this.list;
+          break;
+        case 1:
+          this.grouplist = this.warnlist;
+          break;
+        default:
+          this.grouplist = this.leavelist;
+          break;
+      }
+    },
   },
 };
 </script>
@@ -243,6 +283,26 @@ export default {
 
 .mainShow > .mainShow-content {
   margin: 10px 0px;
+}
+
+.mainShow > .mainShow-content > .mainShow-content-item1 > span:first-child {
+  height: 35px;
+  line-height: 35px;
+  margin-right: 20px;
+}
+.mainShow > .mainShow-content > .mainShow-content-item2 {
+  margin-bottom: 20px;
+  background-color: #ddd;
+}
+.mainShow > .mainShow-content > .mainShow-content-item2 > div {
+  height: 35px;
+  line-height: 35px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.mainShow > .mainShow-content > .mainShow-content-item2 > div:first-child {
+  float: right;
 }
 
 .asideFooter > div {
