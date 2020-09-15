@@ -7,12 +7,7 @@
           <td>设备分组</td>
           <td>
             <el-select v-model="form.group" @change="changeS">
-              <el-option
-                v-for="(item,index) in grouplist"
-                :key="index"
-                :label="item.title"
-                :value="index"
-              ></el-option>
+              <el-option v-for="(item,index) in grouplist" :key="index" :value="item.title"></el-option>
             </el-select>
           </td>
         </tr>
@@ -66,16 +61,14 @@ export default {
   props: {
     device: Object,
     grouplist: Array,
-    tabindex: Number,
     sf: Number,
   },
   data() {
     return {
       modalVisible: false,
-      group: this.grouplist[0].title,
-      newGroupFlag: 0,
+      group: JSON.parse(JSON.stringify(this.device.group)),
       form: {
-        group: this.grouplist[0].title,
+        group: JSON.parse(JSON.stringify(this.device.group)),
         name: this.device.name,
         tcp: "tcp",
         main: this.device.main,
@@ -85,22 +78,24 @@ export default {
   methods: {
     openEditModalBoxes() {
       this.modalVisible = true;
-      console.log("device", this.device);
-      console.log("group", this.grouplist);
-      console.log("tabindex", this.tabindex);
-      console.log("sf", this.sf);
     },
     onSubmit() {
       this.modalVisible = false;
       let newObj = {
         group: this.form.group,
+        ip: this.device.ip,
+        main: this.form.main,
+        name: this.form.name,
+        port: this.device.port,
+        sequence: this.device.sequence,
+        type: this.device.type,
       };
       let sf = this.sf;
-      let tabindex = this.tabindex;
       let list = this.grouplist;
       let sum = 0;
       if (sf === 0) {
         console.log("sf", sf, "sum", sum);
+        console.log(newObj);
         // this.$set(list, list[0].items[0], "123");
         // list[0].items[0] = "123";
         // console.log(list[0].items);
@@ -109,7 +104,22 @@ export default {
         for (let j = 0; j < list[i].items.length; j++) {
           sum += 1;
           if (sf === sum) {
-            console.log("sf", sf, "sum", sum);
+            if (this.group === this.form.group) {
+              list[i].items[j] = newObj;
+            } else {
+              list[i].items.splice(j, 1);
+
+              let anewlist = [];
+              this.grouplist.forEach((val) => {
+                anewlist.push(val.title);
+              });
+              let aindex = anewlist.indexOf(this.form.group);
+
+              list[aindex].items.push(newObj);
+            }
+
+            this.$emit("", list);
+
             return;
           }
         }
@@ -117,9 +127,8 @@ export default {
 
       // this.$set(this.group);
     },
-    changeS(value, label) {
-      console.log(value, label);
-      // this.newGroupFlag = val;
+    changeS(value) {
+      console.log(value);
     },
   },
 };

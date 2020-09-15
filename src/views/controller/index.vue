@@ -1,93 +1,103 @@
 <template>
   <div class="app-controller">
-    <div>
-      <div class="demo-input-suffix">
-        <el-input placeholder="请输入内容" v-model="search">
-          <i
-            slot="suffix"
-            style="cursor: pointer;"
-            @click="searchClick"
-            class="el-input__icon el-icon-search"
-          ></i>
-        </el-input>
-      </div>
-    </div>
-    <el-tabs type="border-card" stretch @tab-click="tabClick">
-      <el-tab-pane>
-        <span slot="label" @click="onclickItems">所有设备</span>
-        <CShow :list="list" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
-      </el-tab-pane>
-      <el-tab-pane>
-        <span slot="label" style="position: relative;" @click="onclickWarn">
-          报警
-          <el-badge
-            :value="warn"
-            class="item"
-            style="position: absolute; top: -12px; right: -25px;"
-          ></el-badge>
-        </span>
-        <CShow :list="warnlist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
-      </el-tab-pane>
-      <el-tab-pane>
-        <span slot="label" style="position: relative;" @click="onclickLeave">
-          离线
-          <el-badge
-            type="info"
-            :value="leave"
-            class="item"
-            style="position: absolute; top: -12px; right: -25px;"
-          ></el-badge>
-        </span>
-        <CShow :list="leavelist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
-      </el-tab-pane>
-    </el-tabs>
-    <div>
-      <el-row class="asideFooter">
-        <el-col :span="12">设备组管理</el-col>
-        <el-col :span="12">新建设备组</el-col>
-      </el-row>
-    </div>
-    <el-row>
-      <el-col :span="24" v-for="(item,index) in mainShow" :key="index" class="mainShow">
-        <el-row class="mainShow-content">
-          <el-col :span="24" class="mainShow-content-item1">
-            <span>{{item.name}}</span>
-            <span>序列号：{{item.ip}}</span>
-            <span style="float:right;">
-              <EditModalBoxes
-                :sf="index"
-                style="display:inline-block;"
-                @openEditModalBoxes="openEditModal"
-                :tindex="tabIndex"
-                :grouplist="grouplist.length === 0 ? list : grouplist"
-                :device="item"
-              ></EditModalBoxes>
-              <el-button type="warning" icon="el-icon-s-tools" circle size="mini"></el-button>
+    <el-row :gutter="10">
+      <el-col :xs="24" :sm="24" :md="4" :lg="4" :xl="4">
+        <div>
+          <div class="demo-input-suffix">
+            <el-input placeholder="请输入内容" v-model="search">
+              <i
+                slot="suffix"
+                style="cursor: pointer;"
+                @click="searchClick"
+                class="el-input__icon el-icon-search"
+              ></i>
+            </el-input>
+          </div>
+        </div>
+        <el-tabs type="border-card" stretch @tab-click="tabClick">
+          <el-tab-pane>
+            <span slot="label" @click="onclickItems">所有设备</span>
+            <CShow :list="list" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
+          </el-tab-pane>
+          <el-tab-pane>
+            <span slot="label" style="position: relative;" @click="onclickWarn">
+              报警
+              <el-badge
+                :value="warn"
+                class="item"
+                style="position: absolute; top: -12px; right: -25px;"
+              ></el-badge>
             </span>
-          </el-col>
-          <el-col
-            class="mainShow-content-item2"
-            v-for="(res,index) in item.main"
-            :key="index"
-            :span="24"
-          >
-            <div>
-              <el-button type="primary" icon="el-icon-bell" circle size="mini"></el-button>
-              <el-button type="warning" icon="el-icon-odometer" circle size="mini"></el-button>
-              <el-button type="warning" icon="el-icon-time" circle size="mini"></el-button>
-            </div>
-            <div>
-              <div>{{res.name}}</div>
-              <div>{{res.id}}</div>
-            </div>
-            <div>
-              <div>{{res.type}}</div>
-              <div>{{res.date}}</div>
-            </div>
+            <CShow :list="warnlist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
+          </el-tab-pane>
+          <el-tab-pane>
+            <span slot="label" style="position: relative;" @click="onclickLeave">
+              离线
+              <el-badge
+                type="info"
+                :value="leave"
+                class="item"
+                style="position: absolute; top: -12px; right: -25px;"
+              ></el-badge>
+            </span>
+            <CShow :list="leavelist" @Conclick="CShowClick" @ConChange="CShowChange"></CShow>
+          </el-tab-pane>
+        </el-tabs>
+        <div>
+          <el-row class="asideFooter">
+            <el-col :span="12">
+              <deviceGroup :deviceGrouplist="list" @deviceGroupClick="deviceGroupClick" />
+            </el-col>
+            <el-col :span="12">
+              <nweDeviceGroup @newDeviceGroupClick="newDeviceGroupClick" />
+            </el-col>
+          </el-row>
+        </div>
+      </el-col>
+      <el-col :xs="24" :sm="24" :md="20" :lg="20" :xl="20">
+        <el-row>
+          <el-col :span="24" v-for="(item,index) in mainShow" :key="index" class="mainShow">
+            <el-row class="mainShow-content">
+              <el-col :span="24" class="mainShow-content-item1">
+                <span>{{item.name}}</span>
+                <span>序列号：{{item.ip}}</span>
+                <span style="float:right;">
+                  <EditModalBoxes
+                    :sf="index"
+                    style="display:inline-block;"
+                    @openEditModalBoxes="openEditModal"
+                    :grouplist="grouplist.length === 0 ? list : grouplist"
+                    :device="item"
+                  ></EditModalBoxes>
+                  <el-button type="warning" icon="el-icon-s-tools" circle size="mini"></el-button>
+                </span>
+              </el-col>
+              <el-col
+                class="mainShow-content-item2"
+                v-for="(res,index) in item.main"
+                :key="index"
+                :span="24"
+              >
+                <div>
+                  <el-button type="primary" icon="el-icon-bell" circle size="mini"></el-button>
+                  <el-button type="warning" icon="el-icon-odometer" circle size="mini"></el-button>
+                  <el-button type="warning" icon="el-icon-time" circle size="mini"></el-button>
+                </div>
+                <div>
+                  <div>{{res.name}}</div>
+                  <div>{{res.id}}</div>
+                </div>
+                <div>
+                  <div>{{res.type}}</div>
+                  <div>{{res.date}}</div>
+                </div>
+              </el-col>
+            </el-row>
           </el-col>
         </el-row>
       </el-col>
     </el-row>
+
     <!-- 分页准备 -->
     <!-- <el-pagination
           @current-change="handleCurrentChange"
@@ -101,8 +111,10 @@
 import { getList } from "@/api/controller";
 import CShow from "@/components/controller/CShow";
 import EditModalBoxes from "@/components/controller/EditModalBoxes";
+import deviceGroup from "@/components/controller/deviceGroup";
+import nweDeviceGroup from "@/components/controller/nweDeviceGroup";
 export default {
-  components: { CShow, EditModalBoxes },
+  components: { CShow, EditModalBoxes, deviceGroup, nweDeviceGroup },
   data() {
     return {
       mainShow: [], //mainShow是在Main中显示的数据
@@ -223,7 +235,13 @@ export default {
     tabClick(val) {
       this.tabIndex = val.index;
     },
-    openEditModal() {},
+    openEditModal(val) {
+      this.list = JSON.parse(JSON.stringify(val));
+      this.warnlist = this.toFilter(JSON.parse(JSON.stringify(val)), "warn");
+      this.leavelist = this.toFilter(JSON.parse(JSON.stringify(val)), "leave");
+    },
+    deviceGroupClick() {},
+    newDeviceGroupClick() {},
     //分页准备
     // handleCurrentChange(val) {
     //   let showList = JSON.parse(JSON.stringify(this.mainShow));
